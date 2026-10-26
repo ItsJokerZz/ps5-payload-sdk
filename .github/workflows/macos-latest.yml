@@ -45,6 +45,7 @@ jobs:
           $MAKE -C samples/hello_sprx
           $MAKE -C samples/hello_stdio
           $MAKE -C samples/hello_world
+          $MAKE -C samples/http_get
           $MAKE -C samples/hwinfo
           $MAKE -C samples/list_files
           $MAKE -C samples/mntinfo
