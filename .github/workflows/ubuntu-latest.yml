@@ -22,7 +22,11 @@ jobs:
     - name: Install prerequisites
       run: |
         sudo apt update
-        sudo apt install clang-18 lld-18 mingw-w64 cmake meson
+        sudo apt install mingw-w64 cmake meson wget
+        wget https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh 23
+        sudo apt install llvm-23 llvm-23-dev lld-23
 
     - name: Build SDK
       run: |
@@ -55,6 +59,7 @@ jobs:
         $MAKE -C samples/hello_sprx
         $MAKE -C samples/hello_stdio
         $MAKE -C samples/hello_world
+        $MAKE -C samples/http_get
         $MAKE -C samples/hwinfo
         $MAKE -C samples/list_files
         $MAKE -C samples/mntinfo

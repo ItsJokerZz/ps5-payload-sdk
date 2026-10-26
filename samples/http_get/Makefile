@@ -23,9 +23,9 @@ else
     $(error PS5_PAYLOAD_SDK is undefined)
 endif
 
-ELF := http2_get.elf
+ELF := http_get.elf
 
-CFLAGS := -Wall -Werror -g -lSceNet -lSceSsl -lSceHttp2
+CFLAGS := -Wall -Werror -g -lSceNet -lSceSsl -lSceHttp
 
 all: $(ELF)
 

@@ -16,6 +16,7 @@ along with this program; see the file COPYING. If not, see
 
 #include <errno.h>
 #include <stdarg.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
@@ -28,24 +29,32 @@ int sceNetPoolDestroy(int);
 int sceSslInit(size_t);
 int sceSslTerm(int);
 
-int sceHttp2Init(int, int, size_t, int);
-int sceHttp2Term(int);
+int sceHttpInit(int, int, size_t);
+int sceHttpTerm(int);
 
-int sceHttp2CreateTemplate(int, const char*, int, int);
-int sceHttp2DeleteTemplate(int);
+int sceHttpCreateTemplate(int, const char*, int, int);
+int sceHttpDeleteTemplate(int);
 
-int sceHttp2CreateRequestWithURL(int, const char*, const char*, uint64_t);
-int sceHttp2DeleteRequest(int);
+int sceHttpCreateConnectionWithURL(int, const char*, int);
+int sceHttpDeleteConnection(int);
 
-int sceHttp2SendRequest(int, const void*, size_t);
-int sceHttp2GetStatusCode(int, int*);
-int sceHttp2ReadData(int, void *, size_t);
+int sceHttpCreateRequestWithURL(int, int, const char*, uint64_t);
+int sceHttpDeleteRequest(int);
+
+int sceHttpSendRequest(int, const void*, size_t);
+int sceHttpGetStatusCode(int, int*);
+int sceHttpReadData(int, void *, size_t);
+
+
+#define SCE_HTTP_VERSION_1_1 2
+#define SCE_HTTP_METHOD_GET  0
 
 
 static int g_libnetMemId  = -1;
 static int g_libsslCtxId  = -1;
 static int g_libhttpCtxId = -1;
 static int g_tmplId       = -1;
+static int g_connId       = -1;
 static int g_reqId        = -1;
 
 
@@ -53,13 +62,13 @@ static int g_reqId        = -1;
  *
  **/
 static int
-http2_init(const char* agent, const char* url) {
+http_init(const char* agent, const char* url) {
   if(sceNetInit()) {
     perror("sceNetInit");
     return -1;
   }
 
-  if((g_libnetMemId=sceNetPoolCreate("http2_get", 32*1024, 0)) < 0) {
+  if((g_libnetMemId=sceNetPoolCreate("http_get", 32*1024, 0)) < 0) {
     perror("sceNetPoolCreate");
     return -1;
   }
@@ -69,19 +78,25 @@ http2_init(const char* agent, const char* url) {
     return -1;
   }
 
-  if((g_libhttpCtxId=sceHttp2Init(g_libnetMemId, g_libsslCtxId,
-				  256*1024, 1)) < 0) {
-    perror("sceHttp2Init");
+  if((g_libhttpCtxId=sceHttpInit(g_libnetMemId, g_libsslCtxId, 256*1024)) < 0) {
+    perror("sceHttpInit");
     return -1;
   }
 
-  if((g_tmplId=sceHttp2CreateTemplate(g_libhttpCtxId, agent, 3, 1)) < 0) {
-    perror("sceHttp2CreateTemplate");
+  if((g_tmplId=sceHttpCreateTemplate(g_libhttpCtxId, agent,
+				     SCE_HTTP_VERSION_1_1, 1)) < 0) {
+    perror("sceHttpCreateTemplate");
     return -1;
   }
 
-  if((g_reqId=sceHttp2CreateRequestWithURL(g_tmplId, "GET", url, 0)) < 0) {
-    perror("sceHttp2CreateRequestWithURL");
+  if((g_connId=sceHttpCreateConnectionWithURL(g_tmplId, url, 0)) < 0) {
+    perror("sceHttpCreateConnectionWithURL");
+    return -1;
+  }
+
+  if((g_reqId=sceHttpCreateRequestWithURL(g_connId, SCE_HTTP_METHOD_GET,
+					  url, 0)) < 0) {
+    perror("sceHttpCreateRequestWithURL");
     return -1;
   }
 
@@ -90,26 +105,26 @@ http2_init(const char* agent, const char* url) {
 
 
 /**
- * 
+ *
  **/
 static int
-http2_get(void) {
+http_get(void) {
   char buf[0x1000];
   int length = -1;
   int status = -1;
 
-  if(sceHttp2SendRequest(g_reqId, NULL, 0)) {
-    perror("sceHttp2SendRequest");
+  if(sceHttpSendRequest(g_reqId, NULL, 0)) {
+    perror("sceHttpSendRequest");
     return -1;
   }
 
-  if(sceHttp2GetStatusCode(g_reqId, &status)) {
-    perror("sceHttp2GetStatusCode");
+  if(sceHttpGetStatusCode(g_reqId, &status)) {
+    perror("sceHttpGetStatusCode");
     return -1;
   }
 
   if(status == 200) {
-    while((length=sceHttp2ReadData(g_reqId, buf, sizeof(buf)-1)) > 0) {
+    while((length=sceHttpReadData(g_reqId, buf, sizeof(buf)-1)) > 0) {
       buf[length] = 0;
       printf("%s", buf);
     }
@@ -122,25 +137,31 @@ http2_get(void) {
 
 
 /**
- * 
+ *
  **/
 static void
-http2_fini(void) {
+http_fini(void) {
   if(g_reqId != -1) {
-    if(sceHttp2DeleteRequest(g_reqId)) {
-      perror("sceHttp2DeleteRequest");
+    if(sceHttpDeleteRequest(g_reqId)) {
+      perror("sceHttpDeleteRequest");
+    }
+  }
+
+  if(g_connId != -1) {
+    if(sceHttpDeleteConnection(g_connId)) {
+      perror("sceHttpDeleteConnection");
     }
   }
 
   if(g_tmplId != -1) {
-    if(sceHttp2DeleteTemplate(g_tmplId)) {
-      perror("sceHttp2DeleteTemplate");
+    if(sceHttpDeleteTemplate(g_tmplId)) {
+      perror("sceHttpDeleteTemplate");
     }
   }
 
   if(g_libhttpCtxId != -1) {
-    if(sceHttp2Term(g_libhttpCtxId)) {
-      perror("sceHttp2Term");
+    if(sceHttpTerm(g_libhttpCtxId)) {
+      perror("sceHttpTerm");
     }
   }
 
@@ -159,18 +180,17 @@ http2_fini(void) {
 
 
 /**
- * 
+ *
  **/
 int
 main() {
   int error = 0;
 
-  if(!(error=http2_init("http2_get/1.0", "http://192.168.1.1"))) {
-    error = http2_get();
+  if(!(error=http_init("http_get/1.0", "http://192.168.1.1"))) {
+    error = http_get();
   }
 
-  http2_fini();
+  http_fini();
 
   return error;
 }
-
