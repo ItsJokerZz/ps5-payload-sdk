@@ -552,7 +552,7 @@ getaddrinfo(const char *hostname, const char *servname,
   info->ai_canonname = NULL;
   info->ai_next = NULL;
 
-  if(info_tmpl.ai_flags & AI_CANONNAME) {
+  if(hostname && (info_tmpl.ai_flags & AI_CANONNAME)) {
     info->ai_canonname = strdup(hostname); //TODO: CNAMEs
   }
 
