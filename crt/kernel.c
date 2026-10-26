@@ -104,6 +104,7 @@ const unsigned long KERNEL_OFFSET_UCRED_CR_SCEAUTHID = 0x58;
 const unsigned long KERNEL_OFFSET_UCRED_CR_SCECAPS   = 0x60;
 const unsigned long KERNEL_OFFSET_UCRED_CR_SCEATTRS  = 0x80;
 
+const unsigned long KERNEL_OFFSET_FILEDESC_FD_CDIR = 0x08;
 const unsigned long KERNEL_OFFSET_FILEDESC_FD_RDIR = 0x10;
 const unsigned long KERNEL_OFFSET_FILEDESC_FD_JDIR = 0x18;
 
@@ -1784,6 +1785,24 @@ kernel_get_proc_jaildir(int pid) {
 }
 
 
+unsigned long
+kernel_get_proc_currdir(int pid) {
+  unsigned long filedesc = 0;
+  unsigned long vnode = 0;
+
+  if(!(filedesc=kernel_get_proc_filedesc(pid))) {
+    return 0;
+  }
+
+  if(kernel_copyout(filedesc + KERNEL_OFFSET_FILEDESC_FD_CDIR, &vnode,
+		    sizeof(vnode))) {
+    return 0;
+  }
+
+  return vnode;
+}
+
+
 int
 kernel_set_proc_rootdir(int pid, unsigned long vnode) {
   unsigned long filedesc = 0;
@@ -1810,6 +1829,23 @@ kernel_set_proc_jaildir(int pid, unsigned long vnode) {
   }
 
   if(kernel_copyin(&vnode, filedesc + KERNEL_OFFSET_FILEDESC_FD_JDIR,
+		   sizeof(vnode))) {
+    return -1;
+  }
+
+  return 0;
+}
+
+
+int
+kernel_set_proc_currdir(int pid, unsigned long vnode) {
+  unsigned long filedesc = 0;
+
+  if(!(filedesc=kernel_get_proc_filedesc(pid))) {
+    return 0;
+  }
+
+  if(kernel_copyin(&vnode, filedesc + KERNEL_OFFSET_FILEDESC_FD_CDIR,
 		   sizeof(vnode))) {
     return -1;
   }

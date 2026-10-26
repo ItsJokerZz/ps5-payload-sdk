@@ -104,6 +104,7 @@ extern const off_t KERNEL_OFFSET_UCRED_CR_SCECAPS;
 extern const off_t KERNEL_OFFSET_UCRED_CR_SCEATTRS;
 
 // struct filedesc field offsets
+extern const off_t KERNEL_OFFSET_FILEDESC_FD_CDIR;
 extern const off_t KERNEL_OFFSET_FILEDESC_FD_RDIR;
 extern const off_t KERNEL_OFFSET_FILEDESC_FD_JDIR;
 
@@ -183,6 +184,9 @@ int32_t  kernel_set_proc_rootdir(pid_t pid, intptr_t vnode);
 
 intptr_t kernel_get_proc_jaildir(pid_t pid);
 int32_t  kernel_set_proc_jaildir(pid_t pid, intptr_t vnode);
+
+intptr_t kernel_get_proc_currdir(pid_t pid);
+int32_t  kernel_set_proc_currdir(pid_t pid, intptr_t vnode);
 
 uid_t   kernel_get_ucred_uid(pid_t pid);
 int32_t kernel_set_ucred_uid(pid_t pid, uid_t uid);
