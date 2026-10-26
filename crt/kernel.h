@@ -87,17 +87,10 @@ typedef struct dynlib_obj {
 
   unsigned long mapbase;
   unsigned long mapsize;
-  unsigned long textsize;
 
-  unsigned long database;
-  unsigned long datasize;
-
-  unsigned long unknown1;
-  unsigned long unknown1size;
+  unsigned long unknown1[5];
 
   unsigned long entry;
-  unsigned long unknown2;
-  unsigned long vaddrbase;
 
   unsigned int tlsindex;
   unsigned long tlsinit;
@@ -108,7 +101,7 @@ typedef struct dynlib_obj {
 
   unsigned long pltgot;
 
-  unsigned long unknown3[6];
+  unsigned long unknown3[8];
 
   unsigned long init;
   unsigned long fini;
