@@ -1835,3 +1835,20 @@ kernel_set_proc_jaildir(int pid, unsigned long vnode) {
 
   return 0;
 }
+
+
+int
+kernel_set_proc_currdir(int pid, unsigned long vnode) {
+  unsigned long filedesc = 0;
+
+  if(!(filedesc=kernel_get_proc_filedesc(pid))) {
+    return 0;
+  }
+
+  if(kernel_copyin(&vnode, filedesc + KERNEL_OFFSET_FILEDESC_FD_CDIR,
+		   sizeof(vnode))) {
+    return -1;
+  }
+
+  return 0;
+}
