@@ -15,6 +15,36 @@ along with this program; see the file COPYING. If not, see
 <http://www.gnu.org/licenses/>.  */
 
 
+#include <errno.h>
+
+
+/**
+ * Set errno from the error number a failed system call left in eax and return
+ * -1, like the libc wrappers of FreeBSD do.
+ **/
+long
+__syscall_set_errno(int err) {
+  errno = err;
+  return -1;
+}
+
+
+/**
+ * Jumped to by a wrapper when the kernel set the carry flag.
+ **/
+void
+__syscall_cerror() {
+  asm(".intel_syntax noprefix\n"
+    "  push rbp\n"
+    "  mov rbp, rsp\n"
+    "  mov edi, eax\n"
+    "  call __syscall_set_errno\n"
+    "  pop rbp\n"
+    "  ret\n"
+    );
+}
+
+
 void
 syscall() {
   asm(".intel_syntax noprefix\n"
@@ -51,6 +81,7 @@ fork() {
     "  mov rax, 2\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -61,6 +92,7 @@ wait4() {
     "  mov rax, 7\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -71,6 +103,7 @@ link() {
     "  mov rax, 9\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -81,6 +114,7 @@ fchdir() {
     "  mov rax, 13\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -91,6 +125,7 @@ mknod() {
     "  mov rax, 14\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -101,6 +136,7 @@ chown() {
     "  mov rax, 16\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -112,6 +148,7 @@ ptrace() {
     "  mov rax, 26\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -122,6 +159,7 @@ dup() {
     "  mov rax, 41\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -132,6 +170,7 @@ ktrace() {
     "  mov rax, 45\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -142,6 +181,7 @@ setlogin() {
     "  mov rax, 50\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -152,6 +192,7 @@ acct() {
     "  mov rax, 51\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -162,6 +203,7 @@ reboot() {
     "  mov rax, 55\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -172,6 +214,7 @@ revoke() {
     "  mov rax, 56\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -182,6 +225,7 @@ symlink() {
     "  mov rax, 57\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -192,6 +236,7 @@ readlink() {
     "  mov rax, 58\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -202,6 +247,7 @@ umask() {
     "  mov rax, 60\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -212,6 +258,7 @@ chroot() {
     "  mov rax, 61\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -222,6 +269,7 @@ vfork() {
     "  mov rax, 66\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -232,6 +280,7 @@ sbrk() {
     "  mov rax, 69\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -242,6 +291,7 @@ sstk() {
     "  mov rax, 70\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -252,6 +302,7 @@ vadvise() {
     "  mov rax, 72\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -262,6 +313,7 @@ getpgrp() {
     "  mov rax, 81\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -272,6 +324,7 @@ setpgid() {
     "  mov rax, 82\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -282,6 +335,7 @@ swapon() {
     "  mov rax, 85\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -292,6 +346,7 @@ fchown() {
     "  mov rax, 123\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -302,6 +357,7 @@ mkfifo() {
     "  mov rax, 132\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -312,6 +368,7 @@ adjtime() {
     "  mov rax, 140\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -322,6 +379,7 @@ setsid() {
     "  mov rax, 147\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -332,6 +390,7 @@ quotactl() {
     "  mov rax, 148\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -342,6 +401,7 @@ nlm_syscall() {
     "  mov rax, 154\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -352,6 +412,7 @@ nfssvc() {
     "  mov rax, 155\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -362,6 +423,7 @@ lgetfh() {
     "  mov rax, 160\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -372,6 +434,7 @@ getfh() {
     "  mov rax, 161\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -382,6 +445,7 @@ rtprio() {
     "  mov rax, 166\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -392,6 +456,7 @@ semsys() {
     "  mov rax, 169\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -402,6 +467,7 @@ msgsys() {
     "  mov rax, 170\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -412,6 +478,7 @@ shmsys() {
     "  mov rax, 171\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -422,6 +489,7 @@ setfib() {
     "  mov rax, 175\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -432,6 +500,7 @@ ntp_adjtime() {
     "  mov rax, 176\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -442,6 +511,7 @@ setgid() {
     "  mov rax, 181\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -452,6 +522,7 @@ pathconf() {
     "  mov rax, 191\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -462,6 +533,7 @@ fpathconf() {
     "  mov rax, 192\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -472,6 +544,7 @@ undelete() {
     "  mov rax, 205\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -482,6 +555,7 @@ getpgid() {
     "  mov rax, 207\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -492,6 +566,7 @@ semget() {
     "  mov rax, 221\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -502,6 +577,7 @@ semop() {
     "  mov rax, 222\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -512,6 +588,7 @@ msgget() {
     "  mov rax, 225\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -522,6 +599,7 @@ msgsnd() {
     "  mov rax, 226\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -532,6 +610,7 @@ msgrcv() {
     "  mov rax, 227\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -542,6 +621,7 @@ shmat() {
     "  mov rax, 228\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -552,6 +632,7 @@ shmdt() {
     "  mov rax, 230\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -562,6 +643,7 @@ shmget() {
     "  mov rax, 231\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -572,6 +654,7 @@ ffclock_getcounter() {
     "  mov rax, 241\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -582,6 +665,7 @@ ffclock_setestimate() {
     "  mov rax, 242\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -592,6 +676,7 @@ ffclock_getestimate() {
     "  mov rax, 243\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -602,6 +687,7 @@ clock_nanosleep() {
     "  mov rax, 244\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -612,6 +698,7 @@ clock_getcpuclockid2() {
     "  mov rax, 247\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -622,6 +709,7 @@ ntp_gettime() {
     "  mov rax, 248\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -632,6 +720,7 @@ minherit() {
     "  mov rax, 250\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -642,6 +731,7 @@ rfork() {
     "  mov rax, 251\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -652,6 +742,7 @@ lchown() {
     "  mov rax, 254\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -662,6 +753,7 @@ aio_read() {
     "  mov rax, 255\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -672,6 +764,7 @@ aio_write() {
     "  mov rax, 256\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -682,6 +775,7 @@ lio_listio() {
     "  mov rax, 257\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -692,6 +786,7 @@ lchmod() {
     "  mov rax, 274\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -702,6 +797,7 @@ lutimes() {
     "  mov rax, 276\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -712,6 +808,7 @@ nstat() {
     "  mov rax, 278\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -722,6 +819,7 @@ nfstat() {
     "  mov rax, 279\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -732,6 +830,7 @@ nlstat() {
     "  mov rax, 280\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -742,6 +841,7 @@ fhopen() {
     "  mov rax, 298\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -752,6 +852,7 @@ fhstat() {
     "  mov rax, 299\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -762,6 +863,7 @@ modnext() {
     "  mov rax, 300\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -772,6 +874,7 @@ modstat() {
     "  mov rax, 301\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -782,6 +885,7 @@ modfnext() {
     "  mov rax, 302\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -792,6 +896,7 @@ modfind() {
     "  mov rax, 303\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -802,6 +907,7 @@ kldload() {
     "  mov rax, 304\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -812,6 +918,7 @@ kldunload() {
     "  mov rax, 305\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -822,6 +929,7 @@ kldfind() {
     "  mov rax, 306\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -832,6 +940,7 @@ kldnext() {
     "  mov rax, 307\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -842,6 +951,7 @@ kldstat() {
     "  mov rax, 308\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -852,6 +962,7 @@ kldfirstmod() {
     "  mov rax, 309\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -862,6 +973,7 @@ setresuid() {
     "  mov rax, 311\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -872,6 +984,7 @@ setresgid() {
     "  mov rax, 312\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -882,6 +995,7 @@ aio_return() {
     "  mov rax, 314\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -892,6 +1006,7 @@ aio_suspend() {
     "  mov rax, 315\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -902,6 +1017,7 @@ aio_cancel() {
     "  mov rax, 316\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -912,6 +1028,7 @@ aio_error() {
     "  mov rax, 317\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -922,6 +1039,7 @@ yield() {
     "  mov rax, 321\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -932,6 +1050,7 @@ utrace() {
     "  mov rax, 335\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -942,6 +1061,7 @@ kldsym() {
     "  mov rax, 337\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -952,6 +1072,7 @@ jail() {
     "  mov rax, 338\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -962,6 +1083,7 @@ nnpfs_syscall() {
     "  mov rax, 339\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -972,6 +1094,7 @@ __acl_get_file() {
     "  mov rax, 347\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -982,6 +1105,7 @@ __acl_set_file() {
     "  mov rax, 348\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -992,6 +1116,7 @@ __acl_get_fd() {
     "  mov rax, 349\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1002,6 +1127,7 @@ __acl_set_fd() {
     "  mov rax, 350\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1012,6 +1138,7 @@ __acl_delete_file() {
     "  mov rax, 351\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1022,6 +1149,7 @@ __acl_delete_fd() {
     "  mov rax, 352\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1032,6 +1160,7 @@ __acl_aclcheck_file() {
     "  mov rax, 353\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1042,6 +1171,7 @@ __acl_aclcheck_fd() {
     "  mov rax, 354\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1052,6 +1182,7 @@ extattrctl() {
     "  mov rax, 355\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1062,6 +1193,7 @@ extattr_set_file() {
     "  mov rax, 356\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1072,6 +1204,7 @@ extattr_get_file() {
     "  mov rax, 357\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1082,6 +1215,7 @@ extattr_delete_file() {
     "  mov rax, 358\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1092,6 +1226,7 @@ aio_waitcomplete() {
     "  mov rax, 359\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1102,6 +1237,7 @@ getresuid() {
     "  mov rax, 360\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1112,6 +1248,7 @@ getresgid() {
     "  mov rax, 361\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1122,6 +1259,7 @@ extattr_set_fd() {
     "  mov rax, 371\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1132,6 +1270,7 @@ extattr_get_fd() {
     "  mov rax, 372\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1142,6 +1281,7 @@ extattr_delete_fd() {
     "  mov rax, 373\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1152,6 +1292,7 @@ __setugid() {
     "  mov rax, 374\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1162,6 +1303,7 @@ eaccess() {
     "  mov rax, 376\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1172,6 +1314,7 @@ afs3_syscall() {
     "  mov rax, 377\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1183,6 +1326,7 @@ __mac_get_proc() {
     "  mov rax, 384\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1193,6 +1337,7 @@ __mac_set_proc() {
     "  mov rax, 385\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1203,6 +1348,7 @@ __mac_get_fd() {
     "  mov rax, 386\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1213,6 +1359,7 @@ __mac_get_file() {
     "  mov rax, 387\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1223,6 +1370,7 @@ __mac_set_fd() {
     "  mov rax, 388\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1233,6 +1381,7 @@ __mac_set_file() {
     "  mov rax, 389\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1243,6 +1392,7 @@ kenv() {
     "  mov rax, 390\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1253,6 +1403,7 @@ lchflags() {
     "  mov rax, 391\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1263,6 +1414,7 @@ mac_syscall() {
     "  mov rax, 394\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1273,6 +1425,7 @@ getfsstat() {
     "  mov rax, 395\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1283,6 +1436,7 @@ statfs() {
     "  mov rax, 396\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1293,6 +1447,7 @@ fstatfs() {
     "  mov rax, 397\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1303,6 +1458,7 @@ fhstatfs() {
     "  mov rax, 398\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1313,6 +1469,7 @@ __mac_get_pid() {
     "  mov rax, 409\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1323,6 +1480,7 @@ __mac_get_link() {
     "  mov rax, 410\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1333,6 +1491,7 @@ __mac_set_link() {
     "  mov rax, 411\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1343,6 +1502,7 @@ extattr_set_link() {
     "  mov rax, 412\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1353,6 +1513,7 @@ extattr_get_link() {
     "  mov rax, 413\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1363,6 +1524,7 @@ extattr_delete_link() {
     "  mov rax, 414\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1373,6 +1535,7 @@ __mac_execve() {
     "  mov rax, 415\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1383,6 +1546,7 @@ swapoff() {
     "  mov rax, 424\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1393,6 +1557,7 @@ __acl_get_link() {
     "  mov rax, 425\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1403,6 +1568,7 @@ __acl_set_link() {
     "  mov rax, 426\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1413,6 +1579,7 @@ __acl_delete_link() {
     "  mov rax, 427\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1423,6 +1590,7 @@ __acl_aclcheck_link() {
     "  mov rax, 428\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1433,6 +1601,7 @@ thr_create() {
     "  mov rax, 430\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1443,6 +1612,7 @@ thr_exit() {
     "  mov rax, 431\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1453,6 +1623,7 @@ thr_self() {
     "  mov rax, 432\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1463,6 +1634,7 @@ thr_kill() {
     "  mov rax, 433\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1473,6 +1645,7 @@ jail_attach() {
     "  mov rax, 436\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1483,6 +1656,7 @@ extattr_list_fd() {
     "  mov rax, 437\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1493,6 +1667,7 @@ extattr_list_file() {
     "  mov rax, 438\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1503,6 +1678,7 @@ extattr_list_link() {
     "  mov rax, 439\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1513,6 +1689,7 @@ thr_suspend() {
     "  mov rax, 442\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1523,6 +1700,7 @@ thr_wake() {
     "  mov rax, 443\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1533,6 +1711,7 @@ kldunloadf() {
     "  mov rax, 444\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1543,6 +1722,7 @@ audit() {
     "  mov rax, 445\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1553,6 +1733,7 @@ auditon() {
     "  mov rax, 446\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1563,6 +1744,7 @@ getauid() {
     "  mov rax, 447\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1573,6 +1755,7 @@ setauid() {
     "  mov rax, 448\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1583,6 +1766,7 @@ getaudit() {
     "  mov rax, 449\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1593,6 +1777,7 @@ setaudit() {
     "  mov rax, 450\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1603,6 +1788,7 @@ getaudit_addr() {
     "  mov rax, 451\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1613,6 +1799,7 @@ setaudit_addr() {
     "  mov rax, 452\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1623,6 +1810,7 @@ auditctl() {
     "  mov rax, 453\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1633,6 +1821,7 @@ thr_new() {
     "  mov rax, 455\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1643,6 +1832,7 @@ kmq_open() {
     "  mov rax, 457\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1653,6 +1843,7 @@ kmq_setattr() {
     "  mov rax, 458\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1663,6 +1854,7 @@ kmq_timedreceive() {
     "  mov rax, 459\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1673,6 +1865,7 @@ kmq_timedsend() {
     "  mov rax, 460\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1683,6 +1876,7 @@ kmq_notify() {
     "  mov rax, 461\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1693,6 +1887,7 @@ kmq_unlink() {
     "  mov rax, 462\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1703,6 +1898,7 @@ abort2() {
     "  mov rax, 463\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1713,6 +1909,7 @@ thr_set_name() {
     "  mov rax, 464\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1723,6 +1920,7 @@ aio_fsync() {
     "  mov rax, 465\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1733,6 +1931,7 @@ sctp_peeloff() {
     "  mov rax, 471\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1743,6 +1942,7 @@ sctp_generic_sendmsg() {
     "  mov rax, 472\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1753,6 +1953,7 @@ sctp_generic_sendmsg_iov() {
     "  mov rax, 473\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1763,6 +1964,7 @@ sctp_generic_recvmsg() {
     "  mov rax, 474\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1773,6 +1975,7 @@ thr_kill2() {
     "  mov rax, 481\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1783,6 +1986,7 @@ cpuset() {
     "  mov rax, 484\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1793,6 +1997,7 @@ cpuset_setid() {
     "  mov rax, 485\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1803,6 +2008,7 @@ faccessat() {
     "  mov rax, 489\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1813,6 +2019,7 @@ fchmodat() {
     "  mov rax, 490\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1823,6 +2030,7 @@ fchownat() {
     "  mov rax, 491\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1833,6 +2041,7 @@ fexecve() {
     "  mov rax, 492\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1843,6 +2052,7 @@ fstatat() {
     "  mov rax, 493\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1853,6 +2063,7 @@ futimesat() {
     "  mov rax, 494\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1863,6 +2074,7 @@ linkat() {
     "  mov rax, 495\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1873,6 +2085,7 @@ mkdirat() {
     "  mov rax, 496\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1883,6 +2096,7 @@ mkfifoat() {
     "  mov rax, 497\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1893,6 +2107,7 @@ mknodat() {
     "  mov rax, 498\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1903,6 +2118,7 @@ openat() {
     "  mov rax, 499\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1913,6 +2129,7 @@ readlinkat() {
     "  mov rax, 500\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1923,6 +2140,7 @@ renameat() {
     "  mov rax, 501\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1933,6 +2151,7 @@ symlinkat() {
     "  mov rax, 502\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1943,6 +2162,7 @@ unlinkat() {
     "  mov rax, 503\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1953,6 +2173,7 @@ posix_openpt() {
     "  mov rax, 504\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1963,6 +2184,7 @@ gssd_syscall() {
     "  mov rax, 505\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1973,6 +2195,7 @@ jail_get() {
     "  mov rax, 506\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1983,6 +2206,7 @@ jail_set() {
     "  mov rax, 507\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -1993,6 +2217,7 @@ jail_remove() {
     "  mov rax, 508\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2003,6 +2228,7 @@ closefrom() {
     "  mov rax, 509\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2013,6 +2239,7 @@ semctl() {
     "  mov rax, 510\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2023,6 +2250,7 @@ msgctl() {
     "  mov rax, 511\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2033,6 +2261,7 @@ shmctl() {
     "  mov rax, 512\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2043,6 +2272,7 @@ lpathconf() {
     "  mov rax, 513\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2053,6 +2283,7 @@ __cap_rights_get() {
     "  mov rax, 515\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2063,6 +2294,7 @@ cap_enter() {
     "  mov rax, 516\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2073,6 +2305,7 @@ cap_getmode() {
     "  mov rax, 517\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2083,6 +2316,7 @@ pdfork() {
     "  mov rax, 518\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2093,6 +2327,7 @@ pdkill() {
     "  mov rax, 519\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2103,6 +2338,7 @@ pdgetpid() {
     "  mov rax, 520\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2113,6 +2349,7 @@ getloginclass() {
     "  mov rax, 523\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2123,6 +2360,7 @@ setloginclass() {
     "  mov rax, 524\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2133,6 +2371,7 @@ rctl_get_racct() {
     "  mov rax, 525\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2143,6 +2382,7 @@ rctl_get_rules() {
     "  mov rax, 526\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2153,6 +2393,7 @@ rctl_get_limits() {
     "  mov rax, 527\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2163,6 +2404,7 @@ rctl_add_rule() {
     "  mov rax, 528\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2173,6 +2415,7 @@ rctl_remove_rule() {
     "  mov rax, 529\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2183,6 +2426,7 @@ posix_fallocate() {
     "  mov rax, 530\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2193,6 +2437,7 @@ posix_fadvise() {
     "  mov rax, 531\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2203,6 +2448,7 @@ wait6() {
     "  mov rax, 532\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2213,6 +2459,7 @@ cap_rights_limit() {
     "  mov rax, 533\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2223,6 +2470,7 @@ cap_ioctls_limit() {
     "  mov rax, 534\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2233,6 +2481,7 @@ cap_ioctls_get() {
     "  mov rax, 535\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2243,6 +2492,7 @@ cap_fcntls_limit() {
     "  mov rax, 536\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2253,6 +2503,7 @@ cap_fcntls_get() {
     "  mov rax, 537\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2263,6 +2514,7 @@ bindat() {
     "  mov rax, 538\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2273,6 +2525,7 @@ connectat() {
     "  mov rax, 539\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2283,6 +2536,7 @@ chflagsat() {
     "  mov rax, 540\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2293,6 +2547,7 @@ aio_mlock() {
     "  mov rax, 543\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2303,6 +2558,7 @@ procctl() {
     "  mov rax, 544\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2313,6 +2569,7 @@ ppoll() {
     "  mov rax, 545\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2323,6 +2580,7 @@ futimens() {
     "  mov rax, 546\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2333,6 +2591,7 @@ utimensat() {
     "  mov rax, 547\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2343,6 +2602,7 @@ numa_getaffinity() {
     "  mov rax, 548\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
@@ -2353,6 +2613,7 @@ numa_setaffinity() {
     "  mov rax, 549\n"
     "  mov r10, rcx\n"
     "  syscall\n"
+    "  jc __syscall_cerror\n"
     "  ret\n"
     );
 }
