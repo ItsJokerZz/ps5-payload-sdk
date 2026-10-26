@@ -35,17 +35,10 @@ typedef struct dynlib_obj {
 
   uintptr_t mapbase;
   uintptr_t mapsize;
-  uintptr_t textsize;
 
-  uintptr_t database;
-  size_t datasize;
-
-  uint64_t unknown1;
-  uint64_t unknown1size;
+  uint64_t unknown1[5];
 
   uintptr_t entry;
-  uint64_t unknown2;
-  uintptr_t vaddrbase;
 
   uint32_t tlsindex;
   uintptr_t tlsinit;
@@ -56,7 +49,7 @@ typedef struct dynlib_obj {
 
   uintptr_t pltgot;
 
-  uint64_t unknown3[6];
+  uint64_t unknown3[8];
 
   uintptr_t init;
   uintptr_t fini;
