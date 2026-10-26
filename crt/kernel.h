@@ -140,6 +140,11 @@ int kernel_copyin(const void *uaddr, unsigned long kaddr, unsigned long len);
 
 unsigned long kernel_get_proc(int pid);
 
+unsigned long kernel_find_pattern(unsigned long addr, unsigned int len,
+				  const char* pattern);
+int kernel_patch(unsigned long addr, const void* before, const void* after,
+		 unsigned short size);
+
 int kernel_proc_getpaddr(int pid, unsigned long vaddr,
 			 unsigned long *paddr, unsigned long *plen);
 
