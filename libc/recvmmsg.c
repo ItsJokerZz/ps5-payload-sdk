@@ -38,12 +38,40 @@ __FBSDID("$FreeBSD$");
 #include <stddef.h>
 //#include "libc_private.h"
 
-__attribute__((weak)) long __syscall(long n, ...);
+
+/**
+ * The raw __syscall() hands back the error number the kernel leaves in rax, so
+ * a failure cannot be told from a result. Read the carry flag instead.
+ **/
+static long
+__syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6) {
+  unsigned long ret;
+  char iserror;
+
+  register long r10 __asm__("r10") = a4;
+  register long r8 __asm__("r8") = a5;
+  register long r9 __asm__("r9") = a6;
+
+  __asm__ __volatile__(
+     "syscall" : "=a"(ret), "=@ccc"(iserror), "+r"(r10), "+r"(r8), "+r"(r9) :
+     "a"(n), "D"(a1), "S"(a2), "d"(a3) :
+     "rcx", "r11", "memory"
+     );
+
+  return iserror ? -ret : ret;
+}
 
 
 static ssize_t
 __sys_recvmsg(int sockfd, struct msghdr *msg, int flags) {
-  return __syscall(SYS_recvmsg, sockfd, msg, flags);
+  long ret;
+
+  if((ret=__syscall6(SYS_recvmsg, sockfd, (long)msg, flags, 0, 0, 0)) < 0) {
+    errno = -ret;
+    return -1;
+  }
+
+  return ret;
 }
 
 
