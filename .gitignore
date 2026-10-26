@@ -5,6 +5,7 @@
 *.elf
 *.exe
 *.sprx
+*.pyc
 nid_db.xml
 aerolib.csv
 .gdb_history
