@@ -71,6 +71,10 @@ uint32_t kernel_getint(intptr_t addr);
 uint16_t kernel_getshort(intptr_t addr);
 uint8_t  kernel_getchar(intptr_t addr);
 
+intptr_t kernel_find_pattern(intptr_t addr, uint32_t len, const char* pattern);
+int kernel_patch(intptr_t addr, const void* before, const void* after,
+		 uint16_t size);
+
 intptr_t kernel_get_proc(pid_t pid);
 intptr_t kernel_get_proc_thread(pid_t pid, pid_t tid);
 intptr_t kernel_get_proc_ucred(pid_t pid);
