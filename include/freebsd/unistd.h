@@ -488,6 +488,7 @@ struct timeval;				/* select(2) */
 int	 acct(const char *);
 int	 async_daemon(void);
 int	 check_utility_compat(const char *);
+ssize_t	 copy_file_range(int, off_t *, int, off_t *, size_t, unsigned int);
 const char *
 	 crypt_get_format(void);
 int	 crypt_set_format(const char *);
