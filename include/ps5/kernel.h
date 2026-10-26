@@ -21,6 +21,61 @@ along with this program; see the file COPYING. If not, see
 
 __BEGIN_DECLS
 
+
+/**
+ * Data structure used by the kernel to keep track of information related to
+ * SELFs and SPRX files loaded into memory.
+ **/
+typedef struct dynlib_obj {
+  uintptr_t next;
+  uintptr_t path;
+  uint64_t unknown0[2];
+  uint32_t refcount;
+  uint64_t handle;
+
+  uintptr_t mapbase;
+  uintptr_t mapsize;
+  uintptr_t textsize;
+
+  uintptr_t database;
+  size_t datasize;
+
+  uint64_t unknown1;
+  uint64_t unknown1size;
+
+  uintptr_t entry;
+  uint64_t unknown2;
+  uintptr_t vaddrbase;
+
+  uint32_t tlsindex;
+  uintptr_t tlsinit;
+  uintptr_t tlsinitsize;
+  size_t tlssize;
+  uint64_t tlsoffset;
+  uint64_t tlsalign;
+
+  uintptr_t pltgot;
+
+  uint64_t unknown3[6];
+
+  uintptr_t init;
+  uintptr_t fini;
+
+  uintptr_t eh_frame_hdr;
+  size_t eh_frame_hdr_size;
+
+  uintptr_t eh_frame;
+  size_t eh_frame_size;
+
+  int32_t status;
+  int32_t flags;
+
+  uint64_t unknown4[5];
+
+  uintptr_t dynsec;
+  uint64_t unknown5[6]; //fingerprint?
+} dynlib_obj_t;
+
 // absolute kernel pointers
 extern const intptr_t KERNEL_ADDRESS_TEXT_BASE;
 extern const intptr_t KERNEL_ADDRESS_DATA_BASE;
@@ -100,6 +155,7 @@ int kernel_mprotect(pid_t pid, intptr_t addr, size_t size, int prot);
 
 int kernel_overlap_sockets(pid_t pid, int master_sock, int victim_sock);
 
+int      kernel_dynlib_obj(pid_t pid, uint32_t handle, dynlib_obj_t* obj);
 int      kernel_dynlib_handle(pid_t pid, const char* basename, uint32_t *handle);
 intptr_t kernel_dynlib_dlsym(pid_t pid, uint32_t handle, const char *sym);
 intptr_t kernel_dynlib_resolve(pid_t pid, uint32_t handle, const char *nid);
