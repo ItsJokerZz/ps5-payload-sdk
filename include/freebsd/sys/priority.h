@@ -123,11 +123,15 @@
 #define	PRI_UNCHANGED	-1	/* Do not change priority. */
 #endif
 
+/*
+ * The kernel of the PS5 has 16 bit fields here, so a struct kinfo_proc that the kernel
+ * returns is 1096 bytes and not 1088.
+ */
 struct priority {
-	u_char	pri_class;	/* Scheduling class. */
-	u_char	pri_level;	/* Normal priority level. */
-	u_char	pri_native;	/* Priority before propagation. */
-	u_char	pri_user;	/* User priority based on p_cpu and p_nice. */
+	u_short	pri_class;	/* Scheduling class. */
+	u_short	pri_level;	/* Normal priority level. */
+	u_short	pri_native;	/* Priority before propagation. */
+	u_short	pri_user;	/* User priority based on p_cpu and p_nice. */
 };
 
 #endif	/* !_SYS_PRIORITY_H_ */
