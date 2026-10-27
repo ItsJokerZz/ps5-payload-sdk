@@ -14,12 +14,16 @@ You should have received a copy of the GNU General Public License
 along with this program; see the file COPYING. If not, see
 <http://www.gnu.org/licenses/>.  */
 
+#include <sys/types.h>
+
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <net/if.h>
 #include <net/if_types.h>
+#include <net/if_var.h>
 #include <netdb.h>
 #include <netinet/in.h>
+#include <netinet/in_var.h>
 #include <netinet6/in6_var.h>
 #include <netinet6/nd6.h>
 
@@ -36,6 +40,8 @@ along with this program; see the file COPYING. If not, see
 #include <sys/ioctl.h>
 #include <sys/errno.h>
 
+
+int sceNetInit(void);
 
 int sceNetPoolCreate(const char*, int, int);
 int sceNetPoolDestroy(int);
@@ -114,6 +120,10 @@ resolve_ntoa(const char *hostname, in_addr_t *addr) {
   int res_handle = -1;
   int err = 0;
 
+  if(sceNetInit()) {
+    return h_errno;
+  }
+
   if((pool_handle=sceNetPoolCreate("", 0x4000, 0)) < 0) {
     err = h_errno;
 
@@ -149,6 +159,10 @@ resolve_aton(const in_addr_t *addr, char *hostname, size_t size) {
   int pool_handle = -1;
   int res_handle = -1;
   int err = 0;
+
+  if(sceNetInit()) {
+    return h_errno;
+  }
 
   if((pool_handle=sceNetPoolCreate("", 0x4000, 0)) < 0) {
     err = h_errno;
@@ -186,7 +200,7 @@ is_ifdisabled(char *name) {
   struct in6_ndireq nd;
   int fd;
 
-  if((fd=socket(AF_INET6, SOCK_DGRAM | SOCK_CLOEXEC, 0)) < 0) {
+  if((fd=socket(AF_INET6, SOCK_DGRAM, 0)) < 0) {
     return -1;
   }
   memset(&nd, 0, sizeof(nd));
