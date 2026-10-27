@@ -137,15 +137,12 @@ payload_run(void) {
   }
 
   // run .fini destructors
-  if((err=__rtld_lib_fini(lib))) {
-    __rtld_lib_close(lib);
-    __rtld_lib_destroy(lib);
-    return err;
-  }
+  err = __rtld_lib_fini(lib);
 
-  err = __rtld_lib_close(lib);
-  __rtld_lib_destroy(lib);
-
+  // The libraries are left loaded, since the process is about to exit. A
+  // system library can have threads of its own that are still running, the
+  // notification library has one, and unloading the library sends them into
+  // memory that is not mapped any more.
   return err;
 }
 
