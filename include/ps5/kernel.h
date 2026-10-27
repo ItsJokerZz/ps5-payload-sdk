@@ -92,6 +92,7 @@ extern const off_t KERNEL_OFFSET_UCRED_CR_UID;
 extern const off_t KERNEL_OFFSET_UCRED_CR_RUID;
 extern const off_t KERNEL_OFFSET_UCRED_CR_SVUID;
 extern const off_t KERNEL_OFFSET_UCRED_CR_RGID;
+extern const off_t KERNEL_OFFSET_UCRED_CR_SVGID;
 extern const off_t KERNEL_OFFSET_UCRED_CR_SCEAUTHID;
 extern const off_t KERNEL_OFFSET_UCRED_CR_SCECAPS;
 extern const off_t KERNEL_OFFSET_UCRED_CR_SCEATTRS;
