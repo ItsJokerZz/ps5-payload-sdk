@@ -20,6 +20,16 @@ along with this program; see the file COPYING. If not, see
 #include <string.h>
 
 
+/**
+ * The system modules live in different places on the two consoles.
+ **/
+#if defined(__PROSPERO__)
+#define LIBSCERANDOM_PATH "libSceRandom.sprx"
+#else
+#define LIBSCERANDOM_PATH "/system/common/lib/libSceRandom.sprx"
+#endif
+
+
 int (*sceRandomGetRandomNumber)(uint8_t* buf, size_t size) = 0;
 
 
@@ -50,7 +60,7 @@ test_random() {
  void* libSceRandom;
   uint8_t buf[0x40];
 
-  if(!(libSceRandom=dlopen("libSceRandom.sprx", RTLD_LAZY))) {
+  if(!(libSceRandom=dlopen(LIBSCERANDOM_PATH, RTLD_LAZY))) {
     puts(dlerror());
     return -1;
   }
