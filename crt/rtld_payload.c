@@ -264,6 +264,12 @@ payload_open(rtld_lib_t* ctx) {
     return -1;
   }
 
+  // the tables have to be there if their sizes say so
+  if((relasz && !rela) || (pltsz && !plt)) {
+    klog_puts("Missing relocation table");
+    return -1;
+  }
+
   // apply relocations
   for(int i=0; i<relasz/sizeof(Elf64_Rela); i++) {
     switch(rela[i].r_info & 0xffffffffl) {

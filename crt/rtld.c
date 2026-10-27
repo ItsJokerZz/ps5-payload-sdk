@@ -356,9 +356,13 @@ __rtld_lib_remove_dep(rtld_lib_t* ctx, rtld_lib_t* lib) {
 
     if(it->prev) {
       it->prev->next = it->next;
+    } else {
+      ctx->children.head = it->next;
     }
     if(it->next) {
       it->next->prev = it->prev;
+    } else {
+      ctx->children.tail = it->prev;
     }
 
     free(it);
@@ -500,11 +504,13 @@ __rtld_lib_close(rtld_lib_t* ctx) {
     return err;
   }
 
+  // a lib is only a dependency of its parent when it was opened with RTLD_GLOBAL,
+  // so there is nothing to remove for the others
   if(ctx->parent) {
-    return __rtld_lib_remove_dep(ctx->parent, ctx);
-  } else {
-    return 0;
+    __rtld_lib_remove_dep(ctx->parent, ctx);
   }
+
+  return 0;
 }
 
 
