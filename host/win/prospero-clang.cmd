@@ -9,31 +9,33 @@ set LIBS_C=-lc
 set LIBS_DEPS=-lSceLibcInternal -lSceNet
 set LIBS_KERN=-lkernel_web
 set "TU="
+set "ARGS=%*"
 
 :checkargs
-    if "%1"=="" goto runcmd
-    if "%1"=="-nostdlibc" (
+    if "%~1"=="" goto runcmd
+    set "ARG=%~1"
+    if "%~1"=="-nostdlibc" (
         set "LIBS_C="
         set "LIBS_DEPS="
 	set "LIBS_KERN="
-    ) else if "%1"=="-nodefaultlibs" (
+    ) else if "%~1"=="-nodefaultlibs" (
         set "LIBS_C="
         set "LIBS_DEPS="
 	set "LIBS_KERN="
-    ) else if "%1"=="-lkernel" (
+    ) else if "%~1"=="-lkernel" (
 	set "LIBS_KERN="
-    ) else if "%1"=="-lkernel_sys" (
+    ) else if "%~1"=="-lkernel_sys" (
 	set "LIBS_KERN="
-    ) else if "%1"=="-lkernel_web" (
+    ) else if "%~1"=="-lkernel_web" (
 	set "LIBS_KERN="
-    ) else if "%1"=="-nostartfiles" (
+    ) else if "%~1"=="-nostartfiles" (
         set "LIBS_CRT="
-    ) else if "%1"=="-c" (
+    ) else if "%~1"=="-c" (
         set "LIBS_CRT="
-    ) else if "%1"=="-shared" (
+    ) else if "%~1"=="-shared" (
         set "LIBS_CRT="
-    ) else if not "%1:~0,1%"=="-" (
-        set TU="%1"
+    ) else if not "%ARG:~0,1%"=="-" (
+        set "TU=%ARG%"
     )
 shift
 goto checkargs
@@ -46,6 +48,9 @@ if "%TU%"=="" (
     set "LIBS_DEPS="
     set "LIBS_KERN="
 )
+
+rem -nostdlibc is for this script, clang does not know it
+set "ARGS=%ARGS:-nostdlibc=%"
 
 rem ensure clang knows where prospero-lld.exe is at
 set PATH=%PATH%;%PS5_PAYLOAD_SDK%\win
@@ -60,7 +65,7 @@ clang ^
     -fno-stack-protector -fno-plt -femulated-tls ^
     %LIBS_C% %LIBS_KERN% ^
     --end-no-unused-arguments ^
-    %* ^
+    %ARGS% ^
     --start-no-unused-arguments ^
     %LIBS_CRT% %LIBS_DEPS% ^
      --end-no-unused-arguments
