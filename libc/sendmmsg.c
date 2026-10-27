@@ -32,45 +32,6 @@ __FBSDID("$FreeBSD$");
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/syscall.h>
-#include <errno.h>
-//#include "libc_private.h"
-
-
-/**
- * The raw __syscall() hands back the error number the kernel leaves in rax, so
- * a failure cannot be told from a result. Read the carry flag instead.
- **/
-static long
-__syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6) {
-  unsigned long ret;
-  char iserror;
-
-  register long r10 __asm__("r10") = a4;
-  register long r8 __asm__("r8") = a5;
-  register long r9 __asm__("r9") = a6;
-
-  __asm__ __volatile__(
-     "syscall" : "=a"(ret), "=@ccc"(iserror), "+r"(r10), "+r"(r8), "+r"(r9) :
-     "a"(n), "D"(a1), "S"(a2), "d"(a3) :
-     "rcx", "r11", "memory"
-     );
-
-  return iserror ? -ret : ret;
-}
-
-
-static ssize_t
-__sys_sendmsg(int sockfd, struct msghdr *msg, int flags) {
-  long ret;
-
-  if((ret=__syscall6(SYS_sendmsg, sockfd, (long)msg, flags, 0, 0, 0)) < 0) {
-    errno = -ret;
-    return -1;
-  }
-
-  return ret;
-}
 
 
 ssize_t
@@ -81,7 +42,7 @@ sendmmsg(int s, struct mmsghdr *__restrict msgvec, size_t vlen, int flags)
 
 	sent = 0;
 	for (i = 0; i < vlen; i++, sent++) {
-		ret = __sys_sendmsg(s, &msgvec[i].msg_hdr, flags);
+		ret = sendmsg(s, &msgvec[i].msg_hdr, flags);
 		if (ret == -1) {
 			if (sent != 0) {
 				/*
