@@ -17,7 +17,7 @@
 include ../Makefile.inc
 
 CFLAGS := -target x86_64-sie-ps5 -fPIC  -fno-plt -fno-stack-protector
-CFLAGS += -nobuiltininc -isystem ../include/freebsd
+CFLAGS += -nobuiltininc -isystem ../include/freebsd -isystem ../include
 CFLAGS += -fvisibility-nodllstorageclass=default
 CFLAGS += -O1
 
