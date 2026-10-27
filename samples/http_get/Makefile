@@ -25,7 +25,7 @@ endif
 
 ELF := http_get.elf
 
-CFLAGS := -Wall -Werror -g -lSceNet -lSceSsl -lSceHttp
+CFLAGS := -Wall -Werror -g -lSceNet -lSceNetCtl -lSceSsl -lSceHttp
 
 all: $(ELF)
 

@@ -26,6 +26,9 @@ int sceNetInit();
 int sceNetPoolCreate(const char*, int, int);
 int sceNetPoolDestroy(int);
 
+int sceNetCtlInit(void);
+void sceNetCtlTerm(void);
+
 int sceSslInit(size_t);
 int sceSslTerm(int);
 
@@ -65,6 +68,12 @@ static int
 http_init(const char* agent, const char* url) {
   if(sceNetInit()) {
     perror("sceNetInit");
+    return -1;
+  }
+
+  // libSceHttp needs libSceNetCtl, without it sceHttpInit aborts the process on the PS4
+  if(sceNetCtlInit()) {
+    perror("sceNetCtlInit");
     return -1;
   }
 
@@ -176,6 +185,8 @@ http_fini(void) {
       perror("sceNetPoolDestroy");
     }
   }
+
+  sceNetCtlTerm();
 }
 
 
