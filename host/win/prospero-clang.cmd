@@ -9,6 +9,7 @@ set LIBS_C=-lc
 set LIBS_DEPS=-lSceLibcInternal -lSceNet
 set LIBS_KERN=-lkernel_web
 set "TU="
+set "ARGS=%*"
 
 :checkargs
     if "%~1"=="" goto runcmd
@@ -48,6 +49,9 @@ if "%TU%"=="" (
     set "LIBS_KERN="
 )
 
+rem -nostdlibc is for this script, clang does not know it
+set "ARGS=%ARGS:-nostdlibc=%"
+
 rem ensure clang knows where prospero-lld.exe is at
 set PATH=%PATH%;%PS5_PAYLOAD_SDK%\win
 
@@ -61,7 +65,7 @@ clang ^
     -fno-stack-protector -fno-plt -femulated-tls ^
     %LIBS_C% %LIBS_KERN% ^
     --end-no-unused-arguments ^
-    %* ^
+    %ARGS% ^
     --start-no-unused-arguments ^
     %LIBS_CRT% %LIBS_DEPS% ^
      --end-no-unused-arguments
