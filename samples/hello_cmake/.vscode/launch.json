@@ -16,7 +16,7 @@
                 {
                     "description": "Trasfer the executable to the remote gdb server",
                     "text": "remote put ${command:cmake.launchTargetPath} /user/temp/${command:cmake.launchTargetName}"
-                }
+                },
                 {
                     "description": "Set path to the executable on the remote gdb server",
                     "text": "set remote exec-file /user/temp/${command:cmake.launchTargetName}"
