@@ -48,7 +48,6 @@ __FBSDID("$FreeBSD$");
 #include "un-namespace.h"
 
 //#include "libc_private.h"
-__attribute__((weak)) long __syscall(long n, ...);
 
 
 int
