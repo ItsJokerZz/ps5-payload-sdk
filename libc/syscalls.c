@@ -45,6 +45,9 @@ __syscall_cerror() {
 }
 
 
+/**
+ * Return the negated error number when the system call fails, like on the PS4.
+ **/
 void
 syscall() {
   asm(".intel_syntax noprefix\n"
@@ -56,6 +59,9 @@ syscall() {
     "  mov r8,  r9\n"
     "  mov r9,  qword ptr [rsp + 8]\n"
     "  syscall\n"
+    "  jnc 1f\n"
+    "  neg rax\n"
+    "1:\n"
     "  ret\n"
     );
 }
@@ -71,6 +77,9 @@ __syscall() {
     "  mov r8,  r9\n"
     "  mov r9,  qword ptr [rsp + 8]\n"
     "  syscall\n"
+    "  jnc 1f\n"
+    "  neg rax\n"
+    "1:\n"
     "  ret\n"
     );
 }
