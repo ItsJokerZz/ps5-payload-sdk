@@ -59,7 +59,7 @@ mprotect(const void* addr, size_t size, int prot) {
     return sys_mprotect(addr, size, prot);
   }
 
-  if(!kernel_mprotect(-1, (intptr_t)addr, size, prot)) {
+  if(kernel_mprotect && !kernel_mprotect(-1, (intptr_t)addr, size, prot)) {
     return 0;
   }
 
@@ -82,7 +82,7 @@ mmap(void* addr, size_t size, int prot, int flags, int fd, off_t offset) {
   }
 
   prot |= PROT_EXEC;
-  if(kernel_mprotect(-1, (intptr_t)map_addr, size, prot)) {
+  if(!kernel_mprotect || kernel_mprotect(-1, (intptr_t)map_addr, size, prot)) {
     munmap(map_addr, size);
     errno = EPERM;
     return MAP_FAILED;
