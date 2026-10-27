@@ -63,7 +63,8 @@ ENTRY(_setjmp)
 	ret
 END(_setjmp)
 
-	WEAK_REFERENCE(___longjmp, _longjmp)
+	.weak	CNAME(_longjmp)
+	.set	CNAME(_longjmp),CNAME(___longjmp)
 ENTRY(___longjmp)
 	movq	%rdi,%rdx
 	/* Restore the mxcsr, but leave exception flags intact. */
