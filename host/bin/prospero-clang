@@ -27,6 +27,7 @@ LIBS_C="-lc"
 LIBS_DEPS="-lSceLibcInternal -lSceNet"
 LIBS_KERN="-lkernel_web"
 TU=""
+ARGS=()
 
 for ARG in "$@"; do
     if [[ "$ARG" == "-nostdlibc" ||
@@ -47,6 +48,10 @@ for ARG in "$@"; do
     fi
     if [[ ! "${ARG:0:1}" == "-" ]]; then
 	TU="${ARG}"
+    fi
+    # -nostdlibc is for this script, clang does not know it
+    if [[ "$ARG" != "-nostdlibc" ]]; then
+	ARGS+=("$ARG")
     fi
 done
 if [[ "${TU}" == "" ]]; then
@@ -77,7 +82,7 @@ exec -a "${SCRIPT_NAME}" "${SCRIPT_DIR}/clang" \
      -fno-stack-protector -fno-plt -femulated-tls \
      $LIBS_C  \
      --end-no-unused-arguments \
-     "$@" \
+     "${ARGS[@]}" \
      --start-no-unused-arguments \
      --sysroot "${PS5_PAYLOAD_SDK}" \
      $LIBS_CRT $LIBS_KERN $LIBS_DEPS \
