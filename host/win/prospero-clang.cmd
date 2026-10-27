@@ -11,29 +11,30 @@ set LIBS_KERN=-lkernel_web
 set "TU="
 
 :checkargs
-    if "%1"=="" goto runcmd
-    if "%1"=="-nostdlibc" (
+    if "%~1"=="" goto runcmd
+    set "ARG=%~1"
+    if "%~1"=="-nostdlibc" (
         set "LIBS_C="
         set "LIBS_DEPS="
 	set "LIBS_KERN="
-    ) else if "%1"=="-nodefaultlibs" (
+    ) else if "%~1"=="-nodefaultlibs" (
         set "LIBS_C="
         set "LIBS_DEPS="
 	set "LIBS_KERN="
-    ) else if "%1"=="-lkernel" (
+    ) else if "%~1"=="-lkernel" (
 	set "LIBS_KERN="
-    ) else if "%1"=="-lkernel_sys" (
+    ) else if "%~1"=="-lkernel_sys" (
 	set "LIBS_KERN="
-    ) else if "%1"=="-lkernel_web" (
+    ) else if "%~1"=="-lkernel_web" (
 	set "LIBS_KERN="
-    ) else if "%1"=="-nostartfiles" (
+    ) else if "%~1"=="-nostartfiles" (
         set "LIBS_CRT="
-    ) else if "%1"=="-c" (
+    ) else if "%~1"=="-c" (
         set "LIBS_CRT="
-    ) else if "%1"=="-shared" (
+    ) else if "%~1"=="-shared" (
         set "LIBS_CRT="
-    ) else if not "%1:~0,1%"=="-" (
-        set TU="%1"
+    ) else if not "%ARG:~0,1%"=="-" (
+        set "TU=%ARG%"
     )
 shift
 goto checkargs
