@@ -27,20 +27,26 @@ kenv_dump(void) {
 
   if((size=kenv(KENV_DUMP, 0, 0, 0)) < 0) {
     perror("kenv");
+    return;
   }
 
   if(!(buf=calloc(1, size+1))) {
     perror("calloc");
+    return;
   }
-  buf[size] = 0;
 
   if(kenv(KENV_DUMP, 0, buf, size) < 0) {
     perror("kenv");
     free(buf);
+    return;
   }
 
-  for(char *p=buf; *p; p+=strlen(p)+1) {
-    printf("%s\n", p);
+  // the dump is size bytes of NUL-terminated entries, and an entry can be
+  // empty (the PS4 kernel starts with one), so walk it by size
+  for(char *p=buf; p<buf+size; p+=strlen(p)+1) {
+    if(*p) {
+      printf("%s\n", p);
+    }
   }
 
   free(buf);
