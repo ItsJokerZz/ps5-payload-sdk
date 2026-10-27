@@ -29,7 +29,7 @@ main(void) {
   struct statfs *buf = 0;
   int nitems = 0;
 
-  if((nitems=getmntinfo(&buf, MNT_WAIT)) < 0) {
+  if((nitems=getmntinfo(&buf, MNT_WAIT)) <= 0) {
     return EXIT_FAILURE;
   }
 
@@ -40,8 +40,6 @@ main(void) {
 	   buf[i].f_fstypename,
 	   buf[i].f_flags);
   }
-
-  free(buf);
 
   return EXIT_SUCCESS;
 }
