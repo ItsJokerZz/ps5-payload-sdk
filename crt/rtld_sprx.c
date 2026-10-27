@@ -113,7 +113,6 @@ static struct sysmodtab {
   {"libSceGvMp4Parser.sprx", 0x8000005c},
   {"libSceHidControl.sprx", 0x80000017},
   {"libSceHttp.sprx", 0x8000000a},
-  {"libSceHttp2.sprx", 0x8000008c},
   {"libSceHttpCache.sprx", 0x80000078},
   {"libSceIcu.sprx", 0x800000a8},
   {"libSceIdu.sprx", 0x800000a6},
