@@ -43,10 +43,6 @@ __FBSDID("$FreeBSD$");
 #include "un-namespace.h"
 
 
-/**
- * The raw __syscall() hands back the error number the kernel leaves in rax, so
- * a failure cannot be told from a result. Read the carry flag instead.
- **/
 static long
 __syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6) {
   unsigned long ret;
