@@ -41,7 +41,5 @@ main(void) {
 	   buf[i].f_flags);
   }
 
-  free(buf);
-
   return EXIT_SUCCESS;
 }
