@@ -23,14 +23,22 @@ along with this program; see the file COPYING. If not, see
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(__PROSPERO__)
 #include <ps5/kernel.h>
+#else
+#include <ps4/kernel.h>
+#endif
 
 
 typedef struct app_info {
   uint32_t app_id;
   uint64_t unknown1;
+#if defined(__PROSPERO__)
   uint32_t app_type;
   char     title_id[10];
+#else
+  char     title_id[14];
+#endif
   char     unknown2[0x3c];
 } app_info_t;
 
