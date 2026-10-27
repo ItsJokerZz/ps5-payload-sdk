@@ -42,26 +42,6 @@ __FBSDID("$FreeBSD$");
 #include <unistd.h>
 #include "un-namespace.h"
 
-
-static long
-__syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6) {
-  unsigned long ret;
-  char iserror;
-
-  register long r10 __asm__("r10") = a4;
-  register long r8 __asm__("r8") = a5;
-  register long r9 __asm__("r9") = a6;
-
-  __asm__ __volatile__(
-     "syscall" : "=a"(ret), "=@ccc"(iserror), "+r"(r10), "+r"(r8), "+r"(r9) :
-     "a"(n), "D"(a1), "S"(a2), "d"(a3) :
-     "rcx", "r11", "memory"
-     );
-
-  return iserror ? -ret : ret;
-}
-
-
 /*
  * From RFC 2553:
  *
@@ -89,7 +69,7 @@ if_nametoindex(const char *ifname)
 	struct ifaddrs *ifaddrs, *ifa;
 	unsigned int ni;
 
-	s = __syscall6(SYS_socket, AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0, 0, 0, 0);
+	s = syscall(SYS_socket, AF_INET, SOCK_DGRAM | SOCK_CLOEXEC, 0);
 	if (s >= 0) {
 		memset(&ifr, 0, sizeof(ifr));
 		strlcpy(ifr.ifr_name, ifname, sizeof(ifr.ifr_name));

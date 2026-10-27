@@ -21,44 +21,12 @@ along with this program; see the file COPYING. If not, see
 #include <sys/syscall.h>
 
 
-static long
-__syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6) {
-  unsigned long ret;
-  char iserror;
-
-  register long r10 __asm__("r10") = a4;
-  register long r8 __asm__("r8") = a5;
-  register long r9 __asm__("r9") = a6;
-
-  __asm__ __volatile__(
-     "syscall" : "=a"(ret), "=@ccc"(iserror), "+r"(r10), "+r"(r8), "+r"(r9) :
-     "a"(n), "D"(a1), "S"(a2), "d"(a3) :
-     "rcx", "r11", "memory"
-     );
-
-  return iserror ? -ret : ret;
-}
-
-
 int
-mount(const char *type, const char *dir, int flags, void *data) {
-  long ret;
+mount(const char *type, const char *dir, int flags, void *data)  {
+  int err;
 
-  if((ret=__syscall6(SYS_mount, (long)type, (long)dir, flags, (long)data, 0, 0)) < 0) {
-    errno = -ret;
-    return -1;
-  }
-
-  return 0;
-}
-
-
-int
-nmount(struct iovec *iov, unsigned int niov, int flags) {
-  long ret;
-
-  if((ret=__syscall6(SYS_nmount, (long)iov, niov, flags, 0, 0, 0)) < 0) {
-    errno = -ret;
+  if((err=syscall(SYS_mount, type, dir, flags, data))) {
+    errno = -err;
     return -1;
   }
 
@@ -68,13 +36,27 @@ nmount(struct iovec *iov, unsigned int niov, int flags) {
 
 int
 unmount(const char *dir, int flags) {
-  long ret;
+  int err;
 
-  if((ret=__syscall6(SYS_unmount, (long)dir, flags, 0, 0, 0, 0)) < 0) {
-    errno = -ret;
+  if((err=syscall(SYS_unmount, dir, flags))) {
+    errno = -err;
     return -1;
   }
 
   return 0;
 }
+
+
+int
+nmount(struct iovec *iov, u_int niov, int flags) {
+  int err;
+
+  if((err=syscall(SYS_nmount, iov, niov, flags))) {
+    errno = -err;
+    return -1;
+  }
+
+  return 0;
+}
+
 

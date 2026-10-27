@@ -23,33 +23,14 @@ along with this program; see the file COPYING. If not, see
 #include <ps5/kernel.h>
 
 
-static long
-__syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6) {
-  unsigned long ret;
-  char iserror;
-
-  register long r10 __asm__("r10") = a4;
-  register long r8 __asm__("r8") = a5;
-  register long r9 __asm__("r9") = a6;
-
-  __asm__ __volatile__(
-     "syscall" : "=a"(ret), "=@ccc"(iserror), "+r"(r10), "+r"(r8), "+r"(r9) :
-     "a"(n), "D"(a1), "S"(a2), "d"(a3) :
-     "rcx", "r11", "memory"
-     );
-
-  return iserror ? -ret : ret;
-}
-
-
 int
 ptrace(int request, pid_t pid, caddr_t addr, int data) {
   uint64_t authid = kernel_get_ucred_authid(-1);
   pid_t my_pid = getpid();
-  long ret;
+  int ret;
 
   kernel_set_ucred_authid(my_pid, 0x4800000000010003l);
-  ret = __syscall6(SYS_ptrace, request, pid, (long)addr, data, 0, 0);
+  ret = syscall(SYS_ptrace, request, pid, addr, data);
   kernel_set_ucred_authid(my_pid, authid);
 
   if(ret < 0) {
