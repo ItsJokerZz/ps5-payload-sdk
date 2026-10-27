@@ -15,8 +15,9 @@ along with this program; see the file COPYING. If not, see
 <http://www.gnu.org/licenses/>.  */
 
 #include <errno.h>
+#include <unistd.h>
 
-int isatty(void) {
+int isatty(int fd) {
   errno = ENOTTY;
   return 0;
 }

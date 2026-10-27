@@ -15,11 +15,14 @@ along with this program; see the file COPYING. If not, see
 <http://www.gnu.org/licenses/>.  */
 
 
+#include <dirent.h>
+
+
 /**
  * file descriptor is the first field of the DIR struct.
  **/
 int
-dirfd(int *dirp) {
-  return *dirp;
+dirfd(DIR *dirp) {
+  return *(int*)dirp;
 }
 
