@@ -1298,17 +1298,6 @@ __setugid() {
 }
 
 void
-eaccess() {
-  asm(".intel_syntax noprefix\n"
-    "  mov rax, 376\n"
-    "  mov r10, rcx\n"
-    "  syscall\n"
-    "  jc __syscall_cerror\n"
-    "  ret\n"
-    );
-}
-
-void
 afs3_syscall() {
   asm(".intel_syntax noprefix\n"
     "  mov rax, 377\n"
@@ -2003,17 +1992,6 @@ cpuset_setid() {
 }
 
 void
-faccessat() {
-  asm(".intel_syntax noprefix\n"
-    "  mov rax, 489\n"
-    "  mov r10, rcx\n"
-    "  syscall\n"
-    "  jc __syscall_cerror\n"
-    "  ret\n"
-    );
-}
-
-void
 fchmodat() {
   asm(".intel_syntax noprefix\n"
     "  mov rax, 490\n"
@@ -2124,17 +2102,6 @@ openat() {
 }
 
 void
-readlinkat() {
-  asm(".intel_syntax noprefix\n"
-    "  mov rax, 500\n"
-    "  mov r10, rcx\n"
-    "  syscall\n"
-    "  jc __syscall_cerror\n"
-    "  ret\n"
-    );
-}
-
-void
 renameat() {
   asm(".intel_syntax noprefix\n"
     "  mov rax, 501\n"
@@ -2215,17 +2182,6 @@ void
 jail_remove() {
   asm(".intel_syntax noprefix\n"
     "  mov rax, 508\n"
-    "  mov r10, rcx\n"
-    "  syscall\n"
-    "  jc __syscall_cerror\n"
-    "  ret\n"
-    );
-}
-
-void
-closefrom() {
-  asm(".intel_syntax noprefix\n"
-    "  mov rax, 509\n"
     "  mov r10, rcx\n"
     "  syscall\n"
     "  jc __syscall_cerror\n"
