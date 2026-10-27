@@ -32,47 +32,11 @@ __FBSDID("$FreeBSD$");
 
 #include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/syscall.h>
 #include <errno.h>
+#include <limits.h>
 #include <poll.h>
 #include <stddef.h>
-//#include "libc_private.h"
-
-
-/**
- * The raw __syscall() hands back the error number the kernel leaves in rax, so
- * a failure cannot be told from a result. Read the carry flag instead.
- **/
-static long
-__syscall6(long n, long a1, long a2, long a3, long a4, long a5, long a6) {
-  unsigned long ret;
-  char iserror;
-
-  register long r10 __asm__("r10") = a4;
-  register long r8 __asm__("r8") = a5;
-  register long r9 __asm__("r9") = a6;
-
-  __asm__ __volatile__(
-     "syscall" : "=a"(ret), "=@ccc"(iserror), "+r"(r10), "+r"(r8), "+r"(r9) :
-     "a"(n), "D"(a1), "S"(a2), "d"(a3) :
-     "rcx", "r11", "memory"
-     );
-
-  return iserror ? -ret : ret;
-}
-
-
-static ssize_t
-__sys_recvmsg(int sockfd, struct msghdr *msg, int flags) {
-  long ret;
-
-  if((ret=__syscall6(SYS_recvmsg, sockfd, (long)msg, flags, 0, 0, 0)) < 0) {
-    errno = -ret;
-    return -1;
-  }
-
-  return ret;
-}
+#include <time.h>
 
 
 ssize_t
@@ -82,15 +46,27 @@ recvmmsg(int s, struct mmsghdr *__restrict msgvec, size_t vlen, int flags,
 	struct pollfd pfd[1];
 	size_t i, rcvd;
 	ssize_t ret;
+	int rflags;
 	int res;
+	int ms;
 	short ev;
 
 	if (timeout != NULL) {
+		if (timeout->tv_sec < 0 || timeout->tv_nsec < 0 ||
+		    timeout->tv_nsec >= 1000000000L) {
+			errno = EINVAL;
+			return (-1);
+		}
+		if (timeout->tv_sec >= INT_MAX / 1000)
+			ms = INT_MAX;
+		else
+			ms = timeout->tv_sec * 1000 +
+			    (timeout->tv_nsec + 999999) / 1000000;
 		pfd[0].fd = s;
 		pfd[0].revents = 0;
 		pfd[0].events = ev = POLLIN | POLLRDNORM | POLLRDBAND |
 		    POLLPRI;
-		res = ppoll(&pfd[0], 1, timeout, NULL);
+		res = poll(&pfd[0], 1, ms);
 		if (res == -1 || res == 0)
 			return (res);
 		if (pfd[0].revents & POLLNVAL) {
@@ -103,24 +79,26 @@ recvmmsg(int s, struct mmsghdr *__restrict msgvec, size_t vlen, int flags,
 		}
 	}
 
-	ret = __sys_recvmsg(s, &msgvec[0].msg_hdr, flags);
+	rflags = flags & ~MSG_WAITFORONE;
+	ret = recvmsg(s, &msgvec[0].msg_hdr, rflags);
 	if (ret == -1)
 		return (ret);
 
 	msgvec[0].msg_len = ret;
 
-	/* 
+	/*
 	 * Do non-blocking receive for second and later messages if
 	 * WAITFORONE is set.
 	 */
 	if (flags & MSG_WAITFORONE)
-		flags |= MSG_DONTWAIT;
+		rflags |= MSG_DONTWAIT;
 
 	rcvd = 1;
 	for (i = rcvd; i < vlen; i++, rcvd++) {
-		ret = __sys_recvmsg(s, &msgvec[i].msg_hdr, flags);
+		ret = recvmsg(s, &msgvec[i].msg_hdr, rflags);
 		if (ret == -1) {
-			/* We have received messages. Let caller know
+			/*
+			 * We have received messages. Let caller know
 			 * about the data received, socket error is
 			 * returned on next invocation.
 			 */
