@@ -141,18 +141,6 @@ chown() {
     );
 }
 
-
-void
-ptrace() {
-  asm(".intel_syntax noprefix\n"
-    "  mov rax, 26\n"
-    "  mov r10, rcx\n"
-    "  syscall\n"
-    "  jc __syscall_cerror\n"
-    "  ret\n"
-    );
-}
-
 void
 dup() {
   asm(".intel_syntax noprefix\n"
